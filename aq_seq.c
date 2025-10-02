@@ -50,24 +50,24 @@ int aq_send( AlarmQueue aq, void * msg, MsgKind k){
       queue -> head = newNode;
       queue -> tail = newNode;
     }
+  }
 }
-
-
-
-
-
-
-
 
 int aq_recv( AlarmQueue aq, void * * msg) {
   return AQ_NOT_IMPL;
 }
 
 int aq_size( AlarmQueue aq) {
-  return 0;
+  struct AlarmQueueStruct *queue = (struct AlarmQueueStruct *) aq;
+  return queue->size;
 }
 
-int aq_alarms( AlarmQueue aq) {
+int aq_alarms(AlarmQueue aq) {
+  struct AlarmQueueStruct *queue = (struct AlarmQueueStruct *) aq;
+
+  if (queue->hasAlarm) {
+    return 1;
+  }
   return 0;
 }
 
