@@ -22,19 +22,26 @@ struct AlarmQueueStruct {
   int size;
 };
 
-AlarmQueue aq_create( ) {
-  return (AlarmQueue)malloc(sizeof(struct AlarmQueueStruct));
+AlarmQueue aq_create(void) {
+  struct AlarmQueueStruct *q = (struct AlarmQueueStruct *)malloc(sizeof(*q));
+  if (!q) return NULL;
+  q->head = q->tail = NULL;
+  q->hasAlarm = false;
+  q->alarm_payload = NULL;
+  q->size = 0;
+  return (AlarmQueue)q;
 }
 
-int aq_send( AlarmQueue aq, void * msg, MsgKind k){
-  if (msg == NULL) {
-    return AQ_NULL_MSG;
-  }
+int aq_send( AlarmQueue aq, void * msg, MsgKind k) {
+  if (!aq)  return AQ_UNINIT;
+  if (!msg) return AQ_NULL_MSG;
+
   struct AlarmQueueStruct *queue = (struct AlarmQueueStruct *) aq;
+
   if (k == AQ_ALARM) {
     if (queue->hasAlarm){
       return AQ_NO_ROOM;
-      }
+    }
     queue->alarm_payload = msg;
     queue->hasAlarm = true;
     queue->size++;
@@ -52,6 +59,13 @@ int aq_send( AlarmQueue aq, void * msg, MsgKind k){
     }
   }
 }
+
+
+
+
+
+
+
 
 int aq_recv( AlarmQueue aq, void * * msg) {
   return AQ_NOT_IMPL;
