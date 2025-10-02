@@ -6,6 +6,8 @@
  */
 
 #include "aq.h"
+#include "stdbool.h"
+#include "stdlib.h"
 
 struct MsgNode {
   void *payload;
@@ -17,7 +19,7 @@ struct AlarmQueueStruct {
   struct MsgNode *tail;
   bool hasAlarm;
   void *alarm_payload;
-  int size = 0;
+  int size;
 };
 
 AlarmQueue aq_create( ) {
@@ -29,23 +31,33 @@ int aq_send( AlarmQueue aq, void * msg, MsgKind k){
     return AQ_NULL_MSG;
   }
   struct AlarmQueueStruct *queue = (struct AlarmQueueStruct *) aq;
-  if (k == AQ_ALARM && !queue->hasAlarm) {
+  if (k == AQ_ALARM) {
+    if (queue->hasAlarm){
+      return AQ_NO_ROOM;
+      }
     queue->alarm_payload = msg;
     queue->hasAlarm = true;
+    queue->size++;
+    return 0;
   } else {
-    return AQ_NO_ROOM;
-  } else {
-    MsgNode *newNode = (struct MsgNode*)malloc(sizeof(struct MsgNode));
+    struct MsgNode *newNode = (struct MsgNode*)malloc(sizeof(struct MsgNode));
     newNode->payload = msg;
     newNode->next = NULL;
-    if (tail != NULL) { // hvis køen ikke er tom
-      tail->next = newNode;
-      aq.tail = newNode;
+    if (queue->tail != NULL) { // hvis køen ikke er tom
+      queue ->tail->next = newNode;
+      queue -> tail = newNode;
     } else {
-      aq.head = newNode;
-      aq.tail = newNode;
+      queue -> head = newNode;
+      queue -> tail = newNode;
     }
 }
+
+
+
+
+
+
+
 
 int aq_recv( AlarmQueue aq, void * * msg) {
   return AQ_NOT_IMPL;
