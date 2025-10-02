@@ -63,16 +63,35 @@ int aq_send( AlarmQueue aq, void * msg, MsgKind k) {
   }
 }
 
+int aq_recv(AlarmQueue aq, void **msg) {
+  if (!aq)  return AQ_UNINIT;
+  if (!msg) return AQ_NO_MSG;
 
+  struct AlarmQueueStruct *queue = (struct AlarmQueueStruct *) aq;
 
+  if (queue->size == 0) {
+    return AQ_NO_MSG;
+  }
 
-
-
-
-
-int aq_recv( AlarmQueue aq, void * * msg) {
-  return AQ_NOT_IMPL;
+  if (queue->hasAlarm) {
+    *msg = queue->alarm_payload;
+    queue->alarm_payload = NULL;
+    queue->hasAlarm = false;
+    queue->size--;
+    return AQ_ALARM;
+  } else {
+    struct MsgNode *node = queue->head;
+    queue->head = node->next;
+    if (queue->head == NULL) {
+      queue->tail = NULL;
+    }
+    *msg = node->payload;
+    free(node);
+    queue->size--;
+    return AQ_NORMAL;
+  }
 }
+
 
 int aq_size( AlarmQueue aq) {
   struct AlarmQueueStruct *queue = (struct AlarmQueueStruct *) aq;
