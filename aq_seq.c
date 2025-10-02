@@ -48,15 +48,18 @@ int aq_send( AlarmQueue aq, void * msg, MsgKind k) {
     return 0;
   } else {
     struct MsgNode *newNode = (struct MsgNode*)malloc(sizeof(struct MsgNode));
+    if (!newNode) return AQ_NO_ROOM;
     newNode->payload = msg;
     newNode->next = NULL;
-    if (queue->tail != NULL) { // hvis køen ikke er tom
-      queue ->tail->next = newNode;
-      queue -> tail = newNode;
+
+    if (queue->tail != NULL) {
+      queue->tail->next = newNode;
     } else {
-      queue -> head = newNode;
-      queue -> tail = newNode;
+      queue->head = newNode;
     }
+    queue->tail = newNode;
+    queue->size++;
+    return 0;
   }
 }
 
